@@ -1,11 +1,11 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import { UserContext } from './UserContext';
+import { URL } from '../config';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -28,18 +28,22 @@ const useStyles = makeStyles((theme) => ({
 const Register = () => {
   const classes = useStyles();
   const [registerInfo, setRegisterInfo] = useState({ username: '', password: '', confirmPassword: '' });
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
 
   const handleChange = (name) => (event) => {
     setRegisterInfo({ ...registerInfo, [name]: event.target.value });
   };
 
   const handleSubmit = async () => {
-    await axios.post('http://35.153.208.107/register', {
+    await axios.post(`http://${URL}/register`, {
       username: registerInfo.username,
       password: registerInfo.password,
       confirmPassword: registerInfo.confirmPassword,
-    }).then((resp) => setUser(resp.data.user)).then(() => navigate('/'))
+    }).then((resp) => {
+      setUser(resp.data.user);
+      localStorage.setItem('token', resp.data.access_token);
+      localStorage.setItem('id', resp.data.user.id);
+    }).then(() => navigate('/'))
       .catch((err) => console.log(err));
   };
 

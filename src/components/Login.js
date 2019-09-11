@@ -1,11 +1,11 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 import { navigate } from '@reach/router';
 import { UserContext } from './UserContext';
+import { URL } from '../config';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -27,18 +27,22 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = () => {
   const classes = useStyles();
-  const [userInfo, setUserInfo] = useState({ username: '', password: '' });
-  const { user, setUser } = useContext(UserContext);
+  const [userInfo, setUserInfo] = useState({ username: 'shawn', password: '123456' });
+  const { setUser } = useContext(UserContext);
 
   const handleChange = (name) => (event) => {
     setUserInfo({ ...userInfo, [name]: event.target.value });
   };
 
   const handleSubmit = async () => {
-    await axios.post('http://35.153.208.107/login', {
+    await axios.post(`http://${URL}/login`, {
       username: userInfo.username,
       password: userInfo.password,
-    }).then((resp) => setUser(resp.data.user)).then(() => navigate('/'))
+    }).then((resp) => {
+      setUser(resp.data.user);
+      localStorage.setItem('token', resp.data.access_token);
+      localStorage.setItem('id', resp.data.user.id);
+    }).then(() => navigate('/'))
       .catch((err) => console.log(err));
   };
 

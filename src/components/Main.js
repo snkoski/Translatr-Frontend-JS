@@ -5,7 +5,6 @@ import { UserContext } from './UserContext';
 
 function Main() {
   const { user, setUser } = useContext(UserContext);
-  console.log('MAIN', user);
   return (
     <div>
       <Translator />

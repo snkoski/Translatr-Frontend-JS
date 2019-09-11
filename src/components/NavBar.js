@@ -4,10 +4,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-// import MenuIcon from '@material-ui/icons/Menu';
 import { Link, navigate } from '@reach/router';
 import { UserContext } from './UserContext';
+import DictionaryContext from './DictionaryContext';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -26,9 +25,14 @@ const useStyles = makeStyles((theme) => ({
 const NavBar = () => {
   const classes = useStyles();
   const { user, setUser } = useContext(UserContext);
+  const { dictionary, setDictionary } = useContext(DictionaryContext);
+
 
   const handleLogout = () => {
     setUser(null);
+    setDictionary([]);
+    localStorage.removeItem('token');
+    localStorage.removeItem('id');
     navigate('/');
   };
 

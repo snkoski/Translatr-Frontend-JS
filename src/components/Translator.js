@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
@@ -8,6 +8,12 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
+import Grid from '@material-ui/core/Grid';
+import { UserContext } from './UserContext';
+import Translation from './Translation';
+// import DictionaryContext from './DictionaryContext';
+import { URL } from '../config';
+import { languages } from '../data/languages';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -15,14 +21,26 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     background: 'blue',
   },
+  textArea: {
+    fontSize: 20,
+  },
 }));
 
 const Translator = () => {
+  const { user } = useContext(UserContext);
+  // const { dictionary } = useContext(DictionaryContext);
   const classes = useStyles();
   const [text, setText] = useState('i like food');
-  const [translation, setTranslation] = useState('');
   const [fromLang, setFromLang] = useState('en');
-  const [toLang, setToLang] = useState('es');
+  const [toLang, setToLang] = useState('fr');
+  const [translations, setTranslations] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      setFromLang(user.language_from);
+      setToLang(user.language_to);
+    }
+  }, [user]);
 
   const handleInput = (e) => {
     const { value } = e.target;
@@ -31,12 +49,14 @@ const Translator = () => {
 
   const handleSubmit = () => {
     const fetchTranslation = async () => {
-      const result = await axios.post('http://35.153.208.107/translate', {
+      // eslint-disable-next-line prefer-const
+      let result = await axios.post(`http://${URL}/translate`, {
         toLang,
         fromLang,
         text,
       });
-      setTranslation(result.data.new_text);
+      result.data.id = Math.random();
+      setTranslations((prevState) => [result.data, ...prevState]);
     };
     fetchTranslation();
   };
@@ -51,16 +71,44 @@ const Translator = () => {
     }
   };
 
+  const renderLanguages = (lang) => (
+    lang.map((l) => (
+      <MenuItem
+        key={Object.keys(l)[0]}
+        value={Object.keys(l)[0]}
+      >
+        {Object.values(l)[0]}
+      </MenuItem>
+    ))
+  );
+
   return (
     <div className="main-container">
-      <h4 className="description">Type a sentence to translate</h4>
+      {user ? (
+        <h4 className="description">
+          Hi
+          {' '}
+          {user.username}
+          {' '}
+          type a sentence to translate
+        </h4>
+      )
+        : <h4 className="description">Type a sentence to translate</h4>}
       <form className="input">
-        <TextareaAutosize aria-label="minimum height" onChange={handleInput} name="text-area" value={text} rows={3} cols={100} placeholder="What would you like to translate today?" />
+        <TextareaAutosize
+          className={classes.textArea}
+          aria-label="minimum height"
+          onChange={handleInput}
+          name="text-area"
+          value={text}
+          rows={3}
+          cols={100}
+          placeholder="What would you like to translate today?"
+        />
         <Button color="primary" className={classes.button} onClick={handleSubmit}>
         Translate
         </Button>
       </form>
-      <p>{translation}</p>
       <FormControl variant="outlined" className={classes.formControl}>
         <InputLabel htmlFor="outlined-age-simple">
           From
@@ -70,9 +118,7 @@ const Translator = () => {
           onChange={handleLanguages}
           input={<OutlinedInput labelWidth={30} name="from" id="outlined-age-simple" />}
         >
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="es">Spanish</MenuItem>
-          <MenuItem value="fr">French</MenuItem>
+          {renderLanguages(languages)}
         </Select>
       </FormControl>
       <FormControl variant="outlined" className={classes.formControl}>
@@ -84,11 +130,19 @@ const Translator = () => {
           onChange={handleLanguages}
           input={<OutlinedInput labelWidth={30} name="to" id="outlined-age-simple" />}
         >
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="es">Spanish</MenuItem>
-          <MenuItem value="fr">French</MenuItem>
+          {renderLanguages(languages)}
         </Select>
       </FormControl>
+      <Grid
+        container
+        direction="column"
+        justify="center"
+        alignItems="center"
+      >
+        {translations.length
+          ? translations.map((t) => <Translation key={t.id} translation={t} user={user} save />)
+          : null}
+      </Grid>
     </div>
   );
 };
