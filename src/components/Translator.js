@@ -30,7 +30,7 @@ const Translator = () => {
   const { user } = useContext(UserContext);
   // const { dictionary } = useContext(DictionaryContext);
   const classes = useStyles();
-  const [text, setText] = useState('i like food');
+  const [text, setText] = useState('');
   const [fromLang, setFromLang] = useState('en');
   const [toLang, setToLang] = useState('fr');
   const [translations, setTranslations] = useState([]);

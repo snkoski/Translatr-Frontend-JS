@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = () => {
   const classes = useStyles();
-  const [userInfo, setUserInfo] = useState({ username: 'shawn', password: '123456' });
+  const [userInfo, setUserInfo] = useState({ username: '', password: '' });
   const { setUser } = useContext(UserContext);
 
   const handleChange = (name) => (event) => {
